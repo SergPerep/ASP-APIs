@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using MinAPI.Database;
 using MinAPI.Model;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,7 @@ using (var scope = app.Services.CreateScope())
     if (!File.Exists(filePath))
         throw new Exception($"File not found: {filePath}");
     var text = File.ReadAllText(filePath);
-    var foods = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Food>>(text);
+    var foods = JsonSerializer.Deserialize<List<Food>>(text, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
     if (foods != null)
         db.Foods.AddRange(foods);
     db.SaveChanges();
