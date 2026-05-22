@@ -1,27 +1,30 @@
-﻿using System.Text.Json;
+﻿namespace Foods;
+
+using System.Text.Json;
+using Carter;
 using Foods.Database;
 using Foods.Endpoints;
+using Foods.Models;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shared;
-using Foods.Models;
 
-namespace Foods;
-
-public class FoodsModule : IModule
+public class FoodsModule : ICarterModule, IModule
 {
     public IServiceCollection RegisterServices(IServiceCollection services)
     {
+        services.AddSingleton<FoodsModule>();
         services.AddDbContext<AppDbContext>(options =>
             options.UseInMemoryDatabase("FoodsDatabase"));
-
         return services;
     }
-    public WebApplication MapEndpoints(WebApplication app)
+
+    public void AddRoutes(IEndpointRouteBuilder app)
     {
         // Populate database
-        using var scope = app.Services.CreateScope();
+        using var scope = app.ServiceProvider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         using var stream = typeof(FoodsModule).Assembly.GetManifestResourceStream("Foods.Database.foods-data-set.json");
         using var reader = new StreamReader(stream);
@@ -36,7 +39,6 @@ public class FoodsModule : IModule
         moduleLevelGroup.MapGet("/", () => "Welcome to the Foods Module!");
 
         FoodsEndpoints.Map(moduleLevelGroup);
-        return app;
     }
-
 }
+
