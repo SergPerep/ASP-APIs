@@ -9,8 +9,6 @@ builder.Services.AddCarter();
 
 var app = builder.Build();
 
-// app.MapGet("/", () => "Minimal API with modules");
-
 app.MapCarter();
 
 app.Run();
